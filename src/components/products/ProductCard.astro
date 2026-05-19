@@ -1,0 +1,83 @@
+---
+import { formatPrice } from "../../lib/format";
+import { createWhatsAppLink } from "../../lib/whatsapp";
+
+const { product } = Astro.props;
+
+const {
+  title,
+  image,
+  price,
+  oldPrice,
+  stock,
+} = product.data;
+---
+
+<div class="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden">
+
+  <a href={`/producto/${product.id}`}>
+    
+    <img
+      src={image}
+      alt={title}
+      class="w-full aspect-square object-cover"
+    />
+
+  </a>
+
+  <div class="p-5">
+
+    <div class="flex items-center justify-between gap-2">
+
+      <h3 class="font-semibold text-lg">
+        {title}
+      </h3>
+
+      {
+        stock > 3 ? null : (
+          <span class="text-xs bg-red-500/20 text-red-300 px-2 py-1 rounded-full">
+            Poco stock
+          </span>
+        )
+      }
+
+    </div>
+
+    <div class="flex items-center gap-2 mt-4">
+
+      {
+        oldPrice && (
+          <span class="text-zinc-500 line-through text-sm">
+            {formatPrice(oldPrice)}
+          </span>
+        )
+      }
+
+      <span class="text-2xl font-bold">
+        {formatPrice(price)}
+      </span>
+
+    </div>
+
+    <div class="grid grid-cols-2 gap-3 mt-5">
+
+      <a
+        href={`/producto/${product.id}`}
+        class="h-11 rounded-xl border border-zinc-700 flex items-center justify-center"
+      >
+        Ver
+      </a>
+
+      <a
+        href={createWhatsAppLink(title)}
+        target="_blank"
+        class="h-11 rounded-xl bg-white text-black flex items-center justify-center font-medium"
+      >
+        Comprar
+      </a>
+
+    </div>
+
+  </div>
+
+</div>

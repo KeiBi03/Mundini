@@ -1,0 +1,13 @@
+@import 'tailwindcss';
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: Inter, sans-serif;
+}
+
+.container-custom {
+  @apply max-w-7xl mx-auto px-4;
+}

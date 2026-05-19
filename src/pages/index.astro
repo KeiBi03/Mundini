@@ -1,17 +1,87 @@
 ---
+import MainLayout from "../layout/MainLayout.astro";
+import Navbar from "../components/layout/Navbar.astro";
+import Footer from "../components/layout/Footer.astro";
+import ProductCard from "../components/products/ProductCard.astro";
 
+import { getCollection } from "astro:content";
+import type { CollectionEntry } from "astro:content";
+
+const products: CollectionEntry<"products">[] = await getCollection("products");
+
+const productsByCategory = products.reduce((acc, product) => {
+  const category = product.data.category || "Otros";
+  if (!acc[category]) {
+    acc[category] = [];
+  }
+  acc[category].push(product);
+  return acc;
+}, {} as Record<string, CollectionEntry<"products">[]>);
+
+const categories = Object.keys(productsByCategory);
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<MainLayout title="Inicio | Mundini Store">
+  {/* 1. AQUÍ PASAMOS LAS CATEGORÍAS AL NAVBAR */}
+  <Navbar categories={categories} />
+
+  <section class="py-10 md:py-16 overflow-hidden">
+    <div class="container-custom">
+      
+      <h1 class="text-3xl md:text-4xl font-black mb-10 text-white tracking-tight">
+        Explorar Catálogo
+      </h1>
+
+      <div class="space-y-12">
+        {
+          categories.map((category) => {
+            const categoryProducts = productsByCategory[category];
+            
+            {/* 2. AGREGAMOS EL ID DINÁMICO REPLAZANDO ESPACIOS
+                Ejemplo: "Mundial 2026" se convierte en id="mundial-2026" */}
+            const categoryId = category.toLowerCase().replace(/\s+/g, "-");
+            
+            return (
+              <div class="flex flex-col scroll-mt-24" id={categoryId}>
+                
+                {/* Encabezado de la Categoría */}
+                <div class="flex items-center justify-between mb-4 pr-4">
+                  <h2 class="text-xl md:text-2xl font-bold text-white capitalize">
+                    {category}
+                  </h2>
+                  <span class="text-xs font-semibold text-zinc-500 bg-zinc-900 px-2.5 py-1 rounded-md border border-zinc-800">
+                    {categoryProducts.length} ítems
+                  </span>
+                </div>
+
+                {/* CONTENEDOR DEL SCROLL HORIZONTAL */}
+                <div class="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scroll-smooth -mx-4 px-4 md:mx-0 md:px-0 scrollbar-none">
+                  {
+                    categoryProducts.map((product) => (
+                      <div class="w-[170px] sm:w-[220px] md:w-[240px] flex-shrink-0 snap-start">
+                        <ProductCard product={product} />
+                      </div>
+                    ))
+                  }
+                </div>
+              </div>
+            );
+          })
+        }
+      </div>
+
+    </div>
+  </section>
+
+  <Footer />
+</MainLayout>
+
+<style>
+  scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>

@@ -1,0 +1,91 @@
+---
+import { getCollection } from "astro:content";
+import type { CollectionEntry } from "astro:content";
+
+import MainLayout from "../../layout/MainLayout.astro";
+
+import Navbar from "../../components/layout/Navbar.astro";
+import Footer from "../../components/layout/Footer.astro";
+
+import ProductCard from "../../components/products/ProductCard.astro";
+
+export async function getStaticPaths() {
+  const products = await getCollection("products");
+
+  // obtener categorías únicas
+  const categories = [
+    ...new Set(
+      products.map((product) => product.data.category)
+    ),
+  ];
+
+  return categories.map((category) => ({
+    params: {
+      category,
+    },
+  }));
+}
+
+const { category } = Astro.params;
+
+const products: CollectionEntry<"products">[] =
+  await getCollection("products");
+
+const filteredProducts = products.filter(
+  (product) =>
+    product.data.category === category
+);
+---
+
+<MainLayout
+  title={`Categoría ${category} | Mundial Store`}
+  description={`Productos de la categoría ${category}`}
+>
+
+  <Navbar />
+
+  <section class="py-20">
+
+    <div class="container-custom">
+
+      <div class="mb-10">
+
+        <p class="text-zinc-400">
+          Categoría
+        </p>
+
+        <h1 class="text-5xl font-black mt-2 capitalize">
+          {category}
+        </h1>
+
+      </div>
+
+      {
+        filteredProducts.length > 0 ? (
+
+          <div class="grid md:grid-cols-3 gap-6">
+
+            {
+              filteredProducts.map((product) => (
+                <ProductCard product={product} />
+              ))
+            }
+
+          </div>
+
+        ) : (
+
+          <div class="text-zinc-500 py-20 text-center">
+            No hay productos disponibles.
+          </div>
+
+        )
+      }
+
+    </div>
+
+  </section>
+
+  <Footer />
+
+</MainLayout>

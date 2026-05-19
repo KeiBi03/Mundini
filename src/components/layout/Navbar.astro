@@ -1,0 +1,55 @@
+---
+import MobileMenu from "./MobileMenu";
+
+// Definimos que el Navbar puede recibir un array de categorías (opcional por si se usa en páginas sin catálogo)
+interface Props {
+  categories?: string[];
+}
+
+const { categories = [] } = Astro.props;
+---
+
+<header class="sticky top-0 z-50 w-full border-b border-zinc-800/60 bg-zinc-950/70 backdrop-blur-md transition-all duration-300">
+  <div class="container-custom h-16 flex items-center justify-between">
+    
+    <a href="/" class="text-xl font-black tracking-tight text-white hover:opacity-90 transition">
+      Mundini<span class="text-[#25D366]">.</span>
+    </a>
+
+    {/* MENÚ DE ESCRITORIO DINÁMICO */}
+    <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-zinc-400">
+      
+      {
+        /* Mapeamos las categorías dinámicamente si existen */
+        categories.map((category) => {
+          const categoryId = category.toLowerCase().replace(/\s+/g, "-");
+          return (
+            <a 
+              href={`/#${categoryId}`} 
+              class="hover:text-white transition-colors duration-200 capitalize"
+            >
+              {category}
+            </a>
+          );
+        })
+      }
+      
+    </nav>
+
+    <div class="flex items-center gap-4">
+      <a
+        href="https://wa.me/573242063165"
+        target="_blank"
+        class="inline-flex items-center justify-center bg-[#25D366] text-white px-4 py-2 h-9 rounded-lg text-xs md:text-sm font-bold shadow-md shadow-[#25D366]/10 hover:bg-[#1EBE5D] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+      >
+        WhatsApp
+      </a>
+
+      <div class="md:hidden">
+        {/* Le pasamos las categorías también al menú móvil para que no se rompa allá */}
+        <MobileMenu client:load />
+      </div>
+    </div>
+
+  </div>
+</header>

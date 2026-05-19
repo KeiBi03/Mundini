@@ -1,0 +1,33 @@
+---
+import "../styles/global.css";
+import FloatingWhatsApp from "../components/shared/FloatingWhatsApp.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "Mundini Store",
+  description = "Sobres originales al mejor precio",
+} = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+
+  <body class="bg-zinc-950 text-white antialiased">
+    <slot />
+  </body>
+
+  <FloatingWhatsApp />
+</html>

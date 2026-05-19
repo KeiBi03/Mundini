@@ -1,0 +1,39 @@
+---
+import { getCollection } from "astro:content";
+
+import ProductCard from "./ProductCard.astro";
+
+const { category, currentId } = Astro.props;
+
+const products = await getCollection("products");
+
+const related = products
+  .filter(
+    (product) =>
+      product.data.category === category &&
+      product.id !== currentId
+  )
+  .slice(0, 3);
+---
+
+{
+  related.length > 0 && (
+    <section class="mt-24">
+
+      <h2 class="text-3xl font-black mb-8">
+        También te puede interesar
+      </h2>
+
+      <div class="grid md:grid-cols-3 gap-6">
+
+        {
+          related.map((product) => (
+            <ProductCard product={product} />
+          ))
+        }
+
+      </div>
+
+    </section>
+  )
+}

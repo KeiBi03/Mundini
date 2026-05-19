@@ -1,0 +1,123 @@
+---
+// components/products/ProductGallery.astro
+interface Props {
+  images: string[];
+  title: string;
+}
+
+const { images, title } = Astro.props;
+
+// Usamos solo las primeras imágenes si la galería es muy extensa (estilo app)
+const displayImages = images.slice(0, 5);
+---
+
+<div class="flex flex-col gap-4 product-gallery-container">
+  
+  {/* CONTENEDOR DE LA IMAGEN PRINCIPAL CON ZOOM */}
+  <div class="relative aspect-square w-full overflow-hidden rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center group cursor-zoom-in">
+    <img
+      id="main-product-image"
+      src={displayImages[0]}
+      alt={title}
+      class="w-full h-full object-contain transition-transform duration-200 origin-center"
+    />
+  </div>
+
+  {/* MINIATURAS INTERACTIVAS (Para seleccionar qué foto ver) */}
+  {displayImages.length > 1 && (
+    <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x">
+      {displayImages.map((img, index) => (
+        <button
+          class={`thumbnail-btn w-20 h-20 aspect-square rounded-xl overflow-hidden border-2 bg-zinc-900 flex-shrink-0 transition-all snap-start ${
+            index === 0 ? 'border-[#25D366]' : 'border-zinc-800 hover:border-zinc-600'
+          }`}
+          data-image-src={img}
+          aria-label={`Ver imagen ${index + 1}`}
+        >
+          <img 
+            src={img} 
+            alt={`${title} miniatura ${index + 1}`} 
+            class="w-full h-full object-cover"
+            loading="lazy"
+          />
+        </button>
+      ))}
+    </div>
+  )}
+</div>
+
+<script>
+  function setupGallery() {
+    const mainImage = document.getElementById('main-product-image') as HTMLImageElement;
+    const thumbnailButtons = document.querySelectorAll('.thumbnail-btn');
+    const imageContainer = mainImage?.parentElement;
+
+    if (!mainImage || !imageContainer) return;
+
+    // 1. LÓGICA PARA SELECCIONAR FOTO (Cambio de imagen principal)
+    thumbnailButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const newSrc = btn.getAttribute('data-image-src');
+        if (newSrc && mainImage.src !== newSrc) {
+          mainImage.src = newSrc;
+
+          // Quitamos el borde activo de todos y se lo ponemos al seleccionado
+          thumbnailButtons.forEach((b) => b.classList.remove('border-[#25D366]', 'border-zinc-800'));
+          thumbnailButtons.forEach((b) => {
+            if(b !== btn) b.classList.add('border-zinc-800');
+          });
+          btn.classList.add('border-[#25D366]');
+        }
+      });
+    });
+
+    // 2. LÓGICA DE LUPA / ZOOM (Estilo e-commerce premium)
+    // Cuando el mouse se mueve dentro del contenedor, calculamos las coordenadas para desplazar el zoom
+    imageContainer.addEventListener('mousemove', (e: MouseEvent) => {
+      const rect = imageContainer.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      // Calculamos el porcentaje de la posición del mouse
+      const xPercent = (x / rect.width) * 100;
+      const yPercent = (y / rect.height) * 100;
+
+      // Aplicamos el punto de origen dinámico y aumentamos la escala a 2x
+      mainImage.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+      mainImage.style.transform = 'scale(2)';
+    });
+
+    // Cuando el mouse sale, la imagen regresa a su tamaño y centro original
+    imageContainer.addEventListener('mouseleave', () => {
+      mainImage.style.transform = 'scale(1)';
+      mainImage.style.transformOrigin = 'center';
+    });
+
+    // Soporte táctil básico para móviles (Zoom al mantener presionado)
+    imageContainer.addEventListener('touchstart', () => {
+      mainImage.style.transform = 'scale(1.5)';
+    }, { passive: true });
+
+    imageContainer.addEventListener('touchend', () => {
+      mainImage.style.transform = 'scale(1)';
+      mainImage.style.transformOrigin = 'center';
+    });
+  }
+
+  // Ejecutar en la carga inicial
+  setupGallery();
+
+  // Si usas transiciones de página de Astro (View Transitions), corre la lógica en cada cambio
+  document.addEventListener('astro:page-load', setupGallery);
+</script>
+
+<style>
+  /* Ocultar barra de scroll en las miniaturas si se desbordan en móviles */
+  scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>
